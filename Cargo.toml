@@ -7,5 +7,13 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-gl = "0.14.0"
+failure = "0.1.8"
+gl = { path = "lib/gl" }
 sdl2 = { version = "0.34.2", features = ["bundled", "static-link"] }
+render_gl_derive = { path = "render_gl_derive" }
+
+[build-dependencies]
+walkdir = "2.3.1"
+
+[features]
+gl_debug = ["gl/debug"]
