@@ -9,6 +9,7 @@ pub mod resources;
 use crate::resources::Resources;
 use std::path::Path;
 use render_gl::data;
+use render_gl::buffer;
 
 #[derive(VertexAttribPointers)]
 #[derive(Copy, Clone, Debug)]
@@ -54,32 +55,17 @@ fn main() {
         Vertex { pos: (0.0, 0.5, 0.0).into(), clr: (0.0, 0.0, 1.0).into() },
     ];
 
-    let mut vertexbufferobject: gl::types::GLuint = 0;
-    unsafe {
-        gl.GenBuffers(1, &mut vertexbufferobject);
-        gl.BindBuffer(gl::ARRAY_BUFFER, vertexbufferobject);
-        gl.BufferData(
-            gl::ARRAY_BUFFER,
-            (vertices.len() * std::mem::size_of::<Vertex>()) as gl::types::GLsizeiptr,
-            vertices.as_ptr() as *const gl::types::GLvoid,
-            gl::STATIC_DRAW
-        );
-        gl.BindBuffer(gl::ARRAY_BUFFER, 0);
-    }
+    let vbo = buffer::ArrayBuffer::new(&gl);
+    vbo.bind();
+    vbo.static_draw_data(&vertices);
+    vbo.unbind();
 
-    let mut vertexarrayobject: gl::types::GLuint = 0;
-    unsafe {
-        gl.GenVertexArrays(1, &mut vertexarrayobject);
-        gl.BindVertexArray(vertexarrayobject);
-        gl.BindBuffer(gl::ARRAY_BUFFER, vertexbufferobject);
-    }
-
+    let mut vao = buffer::VertexArray::new(&gl);
+    vao.bind();
+    vbo.bind();
     Vertex::vertex_attrib_pointers(&gl);
-
-    unsafe {
-        gl.BindBuffer(gl::ARRAY_BUFFER, 0);
-        gl.BindVertexArray(0);
-    }
+    vbo.unbind();
+    vao.unbind();
 
     let mut event_pump = sdl.event_pump().unwrap();
     'main: loop {
@@ -94,8 +80,8 @@ fn main() {
             gl.Clear(gl::COLOR_BUFFER_BIT);
         }
         shader_program.set_used();
+        vao.bind();
         unsafe {
-            gl.BindVertexArray(vertexarrayobject);
             gl.DrawArrays(
                 gl::TRIANGLES,
                 0,
