@@ -1,13 +1,10 @@
 #[macro_use] extern crate failure;
-#[macro_use] extern crate render_gl_derive;
 extern crate gl;
 extern crate sdl2;
+extern crate resources;
+extern crate render_gl;
 
-pub mod render_gl;
-pub mod resources;
-mod triangle;
-
-use crate::resources::Resources;
+use resources::Resources;
 use std::path::Path;
 
 fn main() {
@@ -40,7 +37,7 @@ fn main() {
         gl.ClearColor(0.3, 0.3, 0.5, 1.0);
     }
 
-    let triangle = triangle::Triangle::new(&res, &gl).unwrap();
+    let triangle = render_gl::Triangle::new(&res, &gl).unwrap();
 
     let mut event_pump = sdl.event_pump().unwrap();
     'main: loop {

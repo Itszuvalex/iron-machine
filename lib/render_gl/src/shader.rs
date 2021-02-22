@@ -1,7 +1,10 @@
+extern crate resources;
+extern crate failure;
+
 use gl;
-use crate::resources::{self, Resources};
 use std;
 use std::ffi::{CString, CStr};
+use failure::Fail;
 
 #[derive(Debug, Fail)]
 pub enum Error {
@@ -73,7 +76,7 @@ impl Program {
         Ok(Program{ gl: gl.clone(), id: program_id })
     }
 
-    pub fn from_res(gl: &gl::Gl, res: &Resources, name: &str) -> Result<Program, Error> {
+    pub fn from_res(gl: &gl::Gl, res: &resources::Resources, name: &str) -> Result<Program, Error> {
         const POSSIBLE_EXT: [&str; 2] = [
             ".vert",
             ".frag",
@@ -139,7 +142,7 @@ impl Shader {
         Shader::from_source(gl, source, gl::FRAGMENT_SHADER)
     }
 
-    pub fn from_res(gl: &gl::Gl, res: &Resources, name: &str) -> Result<Shader, Error> {
+    pub fn from_res(gl: &gl::Gl, res: &resources::Resources, name: &str) -> Result<Shader, Error> {
         const POSSIBLE_EXT: [(&str, gl::types::GLenum); 2] =
         [(".vert", gl::VERTEX_SHADER), (".frag", gl::FRAGMENT_SHADER)];
 

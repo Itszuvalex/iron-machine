@@ -1,7 +1,11 @@
+extern crate failure;
+
 use std::path::{Path, PathBuf};
 use std::fs;
 use std::io::{self, Read};
 use std::ffi;
+
+use failure::Fail;
 
 #[derive(Debug, Fail)]
 pub enum Error {

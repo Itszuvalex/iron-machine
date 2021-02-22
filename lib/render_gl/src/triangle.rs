@@ -1,7 +1,12 @@
+extern crate render_gl_derive;
+extern crate resources;
+
 use gl;
 use failure;
-use crate::render_gl::{self, data, buffer};
-use crate::resources::Resources;
+use resources::Resources;
+use crate::shader::Program;
+use crate::buffer;
+use crate::data;
 
 #[derive(VertexAttribPointers)]
 #[derive(Copy, Clone, Debug)]
@@ -14,14 +19,14 @@ pub struct Vertex {
 }
 
 pub struct Triangle {
-    program: render_gl::Program,
+    program: Program,
     _vbo: buffer::ArrayBuffer,
     vao: buffer::VertexArray,
 }
 
 impl Triangle {
     pub fn new(res: &Resources, gl: &gl::Gl) -> Result<Triangle, failure::Error> {
-        let program = render_gl::Program::from_res(&gl, &res, "shaders/triangle").unwrap();
+        let program = Program::from_res(&gl, &res, "shaders/triangle").unwrap();
 
         let vertices: Vec<Vertex> = vec![
             // positions     // colors
