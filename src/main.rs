@@ -5,21 +5,10 @@ extern crate sdl2;
 
 pub mod render_gl;
 pub mod resources;
+mod triangle;
 
 use crate::resources::Resources;
 use std::path::Path;
-use render_gl::data;
-use render_gl::buffer;
-
-#[derive(VertexAttribPointers)]
-#[derive(Copy, Clone, Debug)]
-#[repr(C, packed)]
-struct Vertex {
-    #[location = "0"]
-    pos: data::f32_f32_f32,
-    #[location = "1"]
-    clr: data::f32_f32_f32
-}
 
 fn main() {
     let res = Resources::from_relative_exe_path(Path::new("assets")).unwrap();
@@ -31,8 +20,11 @@ fn main() {
     gl_attr.set_context_profile(sdl2::video::GLProfile::Core);
     gl_attr.set_context_version(4, 5);
 
+    let width = 900;
+    let height = 700;
+
     let window = video_subsystem
-    .window("Game", 900, 700)
+    .window("Game", width, height)
     .opengl()
     .resizable()
     .build()
@@ -41,37 +33,27 @@ fn main() {
     let _gl_context = window.gl_create_context().unwrap();
     let gl = gl::Gl::load_with(|s| video_subsystem.gl_get_proc_address(s) as *const std::os::raw::c_void);
 
+    let mut viewport = render_gl::Viewport::for_window(width as i32, height as i32);
+    viewport.set_used(&gl);
+
     unsafe {
-        gl.Viewport(0, 0, 900, 700);
         gl.ClearColor(0.3, 0.3, 0.5, 1.0);
     }
 
-    let shader_program = render_gl::Program::from_res(&gl, &res, "shaders/triangle").unwrap();
-
-    let vertices: Vec<Vertex> = vec![
-        // positions     // colors
-        Vertex { pos : (-0.5, -0.5, 0.0).into(), clr: (1.0, 0.0, 0.0).into() },
-        Vertex { pos: (0.5, -0.5, 0.0).into(), clr: (0.0, 1.0, 0.0).into() },
-        Vertex { pos: (0.0, 0.5, 0.0).into(), clr: (0.0, 0.0, 1.0).into() },
-    ];
-
-    let vbo = buffer::ArrayBuffer::new(&gl);
-    vbo.bind();
-    vbo.static_draw_data(&vertices);
-    vbo.unbind();
-
-    let mut vao = buffer::VertexArray::new(&gl);
-    vao.bind();
-    vbo.bind();
-    Vertex::vertex_attrib_pointers(&gl);
-    vbo.unbind();
-    vao.unbind();
+    let triangle = triangle::Triangle::new(&res, &gl).unwrap();
 
     let mut event_pump = sdl.event_pump().unwrap();
     'main: loop {
         for event in event_pump.poll_iter() {
             match event {
                 sdl2::event::Event::Quit {..} => break 'main,
+                sdl2::event::Event::Window {
+                    win_event: sdl2::event::WindowEvent::Resized(w, h),
+                    ..
+                } => {
+                    viewport.update_size(w, h);
+                    viewport.set_used(&gl);
+                },
                 _ => {},
             }
         }
@@ -79,15 +61,8 @@ fn main() {
         unsafe {
             gl.Clear(gl::COLOR_BUFFER_BIT);
         }
-        shader_program.set_used();
-        vao.bind();
-        unsafe {
-            gl.DrawArrays(
-                gl::TRIANGLES,
-                0,
-                3
-            );
-        }
+
+        triangle.render(&gl);
 
         window.gl_swap_window();
     }
