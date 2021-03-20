@@ -12,7 +12,6 @@ gl = { path = "lib/gl" }
 sdl2 = { version = "0.34.2", features = ["bundled", "static-link"] }
 render_gl = { path = "lib/render_gl" }
 resources = { path = "lib/resources" }
-engine = { path = "lib/engine" }
 log = "0.4.14"
 
 [build-dependencies]
