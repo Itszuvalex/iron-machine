@@ -24,6 +24,8 @@ fn main() {
     .window("Game", width, height)
     .opengl()
     .resizable()
+    .maximized()
+    .allow_highdpi()
     .build()
     .unwrap();
 
@@ -45,7 +47,7 @@ fn main() {
             match event {
                 sdl2::event::Event::Quit {..} => break 'main,
                 sdl2::event::Event::Window {
-                    win_event: sdl2::event::WindowEvent::Resized(w, h),
+                    win_event: sdl2::event::WindowEvent::SizeChanged(w, h),
                     ..
                 } => {
                     viewport.update_size(w, h);
